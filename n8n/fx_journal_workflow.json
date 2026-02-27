@@ -1,0 +1,121 @@
+{
+  "name": "FX Journal Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds",
+              "secondsInterval": 30
+            }
+          ]
+        }
+      },
+      "id": "trigger",
+      "name": "Check Inbox Every 30s",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [100, 300]
+    },
+    {
+      "parameters": {
+        "command": "ls -1 ~/FXBacktest/inbox/*.mp4 ~/FXBacktest/inbox/*.mov ~/FXBacktest/inbox/*.mkv 2>/dev/null | head -1"
+      },
+      "id": "check_files",
+      "name": "Check for New Videos",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [320, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.stdout }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "has_video",
+      "name": "Video Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [540, 300]
+    },
+    {
+      "parameters": {
+        "command": "={{ \"/path/to/fx-journal-pipeline/venv/bin/python /path/to/fx-journal-pipeline/scripts/process_video.py '\" + $json.stdout.trim() + \"'\" }}"
+      },
+      "id": "process_video",
+      "name": "Run Pipeline",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [760, 200]
+    },
+    {
+      "parameters": {},
+      "id": "no_video",
+      "name": "No Videos - Skip",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [760, 400]
+    }
+  ],
+  "connections": {
+    "Check Inbox Every 30s": {
+      "main": [
+        [
+          {
+            "node": "Check for New Videos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check for New Videos": {
+      "main": [
+        [
+          {
+            "node": "Video Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Video Found?": {
+      "main": [
+        [
+          {
+            "node": "Run Pipeline",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Videos - Skip",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "fx-journal"
+    }
+  ]
+}

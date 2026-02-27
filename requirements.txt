@@ -1,0 +1,17 @@
+# FX Journal Pipeline — Dependencies
+# Install with: pip install -r requirements.txt
+
+# Local Whisper transcription (Apple Silicon optimized)
+mlx-whisper>=0.4.0
+
+# Google APIs
+google-auth>=2.0.0
+google-auth-oauthlib>=1.0.0
+google-api-python-client>=2.0.0
+gspread>=6.0.0
+
+# Gemini API (new SDK, replaces deprecated google-generativeai)
+google-genai>=1.0.0
+
+# Utilities
+python-dotenv>=1.0.0

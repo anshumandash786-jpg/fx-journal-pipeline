@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.fxjournal.watcher</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <!-- UPDATE THIS PATH to your actual project location -->
+        <string>/Users/ansumandash126/.gemini/antigravity/scratch/fx-journal-pipeline/venv/bin/python</string>
+        <string>/Users/ansumandash126/.gemini/antigravity/scratch/fx-journal-pipeline/scripts/watch_inbox.py</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/ansumandash126/.gemini/antigravity/scratch/fx-journal-pipeline</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <!-- These will be loaded from .env by the script, but you can also set them here -->
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/ansumandash126/FXBacktest/logs/watcher_stdout.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/ansumandash126/FXBacktest/logs/watcher_stderr.log</string>
+</dict>
+</plist>
