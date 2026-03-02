@@ -27,15 +27,17 @@ for d in [INBOX_DIR, PROCESSING_DIR, DONE_DIR, SCREENSHOTS_DIR]:
 # WHISPER (Local Transcription)
 # ─────────────────────────────────────────────
 WHISPER_MODEL = "mlx-community/whisper-large-v3-turbo"
-# Supported: "mlx-community/whisper-large-v3-turbo" (best accuracy)
-#            "mlx-community/whisper-small" (faster, less accurate)
+# Best publicly available MLX Whisper model (no HF auth needed)
+# Note: whisper-large-v3 (non-turbo) is gated and requires HuggingFace login
+#       whisper-large-v3-turbo is ~1-2% less accurate but publicly accessible
+#       whisper-small is fastest but least accurate
 
 # ─────────────────────────────────────────────
 # GEMINI API
 # ─────────────────────────────────────────────
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
-GEMINI_MODEL = "gemini-2.0-flash"
-# Free tier: 1,500 requests/day — more than enough
+GEMINI_MODEL = "gemini-2.5-flash"
+# Latest Flash model — fast and cost-effective
 
 # ─────────────────────────────────────────────
 # GOOGLE SHEETS

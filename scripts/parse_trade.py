@@ -31,25 +31,46 @@ logger = logging.getLogger("parse_trade")
 # ─────────────────────────────────────────────
 # EXTRACTION PROMPT
 # ─────────────────────────────────────────────
-EXTRACTION_PROMPT = """You are an expert trade journal parser for a professional FX trader. Your job is to read a transcript of a backtesting session narration and extract structured trade data.
+EXTRACTION_PROMPT = """You are an expert FX trade journal analyst. Read the transcript of a backtesting session and extract structured trade data.
 
-The trader analyzes price in 3 stages:
-1. **Direction** — Higher timeframe (HTF) bias, why price is expected to move a certain way
-2. **Location** — The specific zone/area chosen for the trade (OB, FVG, breaker, liquidity, etc.)
-3. **Execution** — The specific model/pattern used to enter (BOS, MSS, CISD, FVG entry, etc.)
+The trader uses ICT/SMC methodology and analyzes trades in 3 stages:
+1. **Direction** — HTF bias (why price should move a certain way)
+2. **Location** — The zone/area for entry (OB, FVG, breaker, demand/supply, etc.)
+3. **Execution** — The entry model/pattern (CHoCH, BOS, MSS, CISD, etc.)
 
-IMPORTANT RULES:
-- Extract ALL trades mentioned in the transcript (there may be 1 or more).
-- For prices, extract the EXACT numbers spoken. Do not guess or calculate prices.
+CRITICAL RULES:
+- Extract ALL trades mentioned (there may be 1 or more).
+- For prices, extract the EXACT numbers spoken. Do not guess.
 - If a field is not mentioned, set it to null.
-- For direction, ONLY use "Long" or "Short".
-- For outcome, ONLY use "Win", "Loss", "Breakeven", or "Partial".
-- For session, ONLY use "Asian", "London", "NY AM", "NY PM", or "London-NY Overlap".
-- Confluence score and conviction should be integers 1-5. If not mentioned, set to null.
-- Trade duration should be a string like "45 min" or "2 hours". If not mentioned, set to null.
-- Return ONLY valid JSON. No markdown, no code fences, no explanatory text.
+- For direction: ONLY "Long" or "Short".
+- For outcome: ONLY "Win", "Loss", "Breakeven", or "Partial".
+- For session: ONLY "Asian", "London", "NY AM", "NY PM", or "London-NY Overlap".
+- Confluence/conviction: integers 1-5. If not mentioned, null.
+- Trade duration: string like "45 min" or "2 hours". If not mentioned, null.
 
-Return a JSON array of trade objects. Each trade should have this exact structure:
+PAIR IDENTIFICATION:
+- If the trader says the pair name, use it (e.g. "EURUSD", "cable" = GBPUSD, "fiber" = EURUSD).
+- If NOT explicitly mentioned, INFER from the price levels:
+  - 1.0xxx–1.1xxx range → likely EURUSD or GBPUSD (check 5-digit vs 4-digit precision)
+  - 1.2xxx–1.3xxx range → likely GBPUSD
+  - 0.6xxx–0.7xxx range → likely AUDUSD or NZDUSD
+  - 1xx.xxx range → likely USDJPY
+  - If unsure, set to null.
+
+THESIS FIELDS — VERY IMPORTANT:
+- Do NOT copy raw transcript text. The trader speaks casually and uses filler words.
+- SUMMARIZE each thesis into 1-2 crisp, professional sentences using proper ICT/SMC terminology.
+- Write as if you are filling a professional trade journal that the trader will review later.
+- Examples of good thesis writing:
+  - Direction: "Bearish HTF bias. D1 BOS to downside with H4 pullback into premium. Expecting continuation lower."
+  - Location: "M15 supply zone / OB at the origin of the impulsive leg down. Last supply before BOS."
+  - Execution: "M1 CHoCH confirmation after liquidity sweep of Asian high. Entered on the demand retest."
+
+MISTAKES & REVIEW:
+- If the trader mentions any mistakes, hesitations, or self-corrections, capture them concisely.
+- If the trader gives a post-trade review (e.g. "this was a 3.84R trade"), summarize it.
+
+Return a JSON array of trade objects with this structure:
 
 [
   {
@@ -78,18 +99,18 @@ Return a JSON array of trade objects. Each trade should have this exact structur
     "trade_duration": null,
 
     "htf_reference": "H4 / D1 / W1 / etc. or null",
-    "direction_thesis": "Full narrative of why they believe price is going this direction",
-    "location_zone_type": "OB / FVG / Breaker / Liquidity / BOS level / etc. or null",
+    "direction_thesis": "1-2 crisp sentences summarizing HTF directional bias and reasoning",
+    "location_zone_type": "OB / FVG / Breaker / Demand / Supply / BOS level / etc. or null",
     "location_timeframe": "M15 / H1 / etc. or null",
-    "location_thesis": "Full narrative of why this specific location was chosen",
-    "execution_model_name": "BOS / MSS / CISD / FVG entry / OB mitigation / etc. or null",
+    "location_thesis": "1-2 crisp sentences on why this zone was chosen",
+    "execution_model_name": "CHoCH / BOS / MSS / CISD / FVG entry / OB mitigation / etc. or null",
     "execution_timeframe": "M1 / M5 / etc. or null",
-    "execution_thesis": "Full narrative of what made them enter at that exact moment",
+    "execution_thesis": "1-2 crisp sentences on the entry trigger and confirmation",
 
     "confluence_score": null,
     "pre_trade_conviction": null,
-    "mistakes_noted": null,
-    "post_trade_review": null,
+    "mistakes_noted": "Concise summary of mistakes or null",
+    "post_trade_review": "Concise summary of post-trade observations or null",
     "early_exit_reason": null
   }
 ]
@@ -99,7 +120,7 @@ TRANSCRIPT:
 {transcript_text}
 \"\"\"
 
-Extract all trades from the above transcript. Return ONLY the JSON array."""
+Extract all trades. Summarize thesis fields — do NOT copy transcript verbatim. Return ONLY the JSON array."""
 
 
 def parse_trades_from_transcript(transcript_text: str) -> list[dict]:
