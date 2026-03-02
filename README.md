@@ -1,4 +1,4 @@
-# FX Journal Pipeline
+# Backtesting Video Automation To google sheet
 
 **Automated backtesting journal for FX traders.** Record your FX Replay session, narrate your trades, and this pipeline automatically logs everything to Google Sheets — trade math, reasoning, and chart screenshots.
 
@@ -108,4 +108,4 @@ launchctl load ~/Library/LaunchAgents/com.fxjournal.watcher.plist
 
 If you get a new computer, lose this project, or want to hand this over to another AI assistant (like a fresh Antigravity session), just copy and paste this exact prompt to the AI:
 
-> *"Hi, I have a backtesting video automation project hosted on GitHub here: `https://github.com/anshumandash786-jpg/fx-journal-pipeline.git`. Please clone this repository to a new scratch folder. Read the `README.md`, `walkthrough.md`, and the python scripts to understand how the pipeline works. Please guide me through setting up the `.env` API keys and running the `setup.sh` file to get this working on my machine. If I face any issues, please help me debug and execute the pipeline."*
+> *"Hi, I have a backtesting video automation project hosted on GitHub here: `https://github.com/anshumandash786-jpg/Backtesting-Video-Automation-To-google-sheet.git`. Please clone this repository to a new scratch folder. Read the `README.md`, `walkthrough.md`, and the python scripts to understand how the pipeline works. Please guide me through setting up the `.env` API keys and running the `setup.sh` file to get this working on my machine. If I face any issues, please help me debug and execute the pipeline."*

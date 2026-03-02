@@ -1,5 +1,5 @@
 {
-  "name": "FX Journal Pipeline",
+  "name": "Backtesting Video Automation To google sheet",
   "nodes": [
     {
       "parameters": {

@@ -1,6 +1,6 @@
 #!/bin/bash
 # ═══════════════════════════════════════════════════════
-# FX Journal — Process Backtesting Videos
+# Backtesting Video Automation To google sheet — Process Backtesting Videos
 # Double-click this file to process all videos in
 # ~/Desktop/Backtested video/
 # ═══════════════════════════════════════════════════════

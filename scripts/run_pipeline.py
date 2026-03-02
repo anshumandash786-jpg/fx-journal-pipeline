@@ -39,7 +39,7 @@ def print_banner():
     """Print a nice startup banner."""
     print()
     print("╔══════════════════════════════════════════════════════╗")
-    print("║        🏦  FX JOURNAL — VIDEO PROCESSOR  🏦         ║")
+    print("║ 🏦 BACKTESTING VIDEO AUTOMATION TO GOOGLE SHEET 🏦  ║")
     print("╠══════════════════════════════════════════════════════╣")
     print(f"║  📂 Watching: ~/Desktop/Backtested video/            ║")
     print(f"║  🕐 Started:  {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}                   ║")

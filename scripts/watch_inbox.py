@@ -57,7 +57,7 @@ def watch_forever(poll_interval: int = 30):
         poll_interval: Seconds between scans (default: 30)
     """
     logger.info("=" * 60)
-    logger.info("FX Journal Pipeline — Inbox Watcher")
+    logger.info("Backtesting Video Automation To google sheet — Inbox Watcher")
     logger.info(f"Watching: {INBOX_DIR}")
     logger.info(f"Poll interval: {poll_interval}s")
     logger.info("Press Ctrl+C to stop")

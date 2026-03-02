@@ -132,7 +132,7 @@ def build_analytics_cells() -> list[list]:
     cells = []
 
     # ── ROW 1-2: HEADER ──
-    cells.append(["═══ FX JOURNAL ANALYTICS DASHBOARD ═══", "", "", "", "", "", "", ""])
+    cells.append(["═══ BACKTESTING VIDEO AUTOMATION DASHBOARD ═══", "", "", "", "", "", "", ""])
     cells.append([""])
 
     # ── ROW 3: KPI LABELS ──

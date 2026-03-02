@@ -1,6 +1,6 @@
 #!/bin/bash
 # ═══════════════════════════════════════════════════════════════
-# FX Journal Pipeline — Mac Mini M1 Setup Script
+# Backtesting Video Automation To google sheet — Mac Mini M1 Setup Script
 # ═══════════════════════════════════════════════════════════════
 #
 # This script installs ALL dependencies on your Mac Mini M1.
@@ -15,7 +15,7 @@
 set -e  # Exit on any error
 
 echo "═══════════════════════════════════════════════════════════"
-echo "  FX Journal Pipeline — Setup (Mac Mini M1)"
+echo "  Backtesting Video Automation To google sheet — Setup (Mac Mini M1)"
 echo "═══════════════════════════════════════════════════════════"
 echo ""
 

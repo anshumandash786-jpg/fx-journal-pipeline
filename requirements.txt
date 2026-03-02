@@ -1,4 +1,4 @@
-# FX Journal Pipeline — Dependencies
+# Backtesting Video Automation To google sheet — Dependencies
 # Install with: pip install -r requirements.txt
 
 # Local Whisper transcription (Apple Silicon optimized)
