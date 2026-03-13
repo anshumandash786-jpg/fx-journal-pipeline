@@ -37,7 +37,7 @@ python scripts/watch_inbox.py
 ## Project Structure
 
 ```
-fx-journal-pipeline/
+Backtesting-Video-Automation-To-google-sheet/
 ├── config/
 │   └── settings.py          # All configurable settings
 ├── scripts/

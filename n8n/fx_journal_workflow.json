@@ -47,7 +47,7 @@
     },
     {
       "parameters": {
-        "command": "={{ \"/path/to/fx-journal-pipeline/venv/bin/python /path/to/fx-journal-pipeline/scripts/process_video.py '\" + $json.stdout.trim() + \"'\" }}"
+        "command": "={{ \"/path/to/Backtesting-Video-Automation-To-google-sheet/venv/bin/python /path/to/Backtesting-Video-Automation-To-google-sheet/scripts/process_video.py '\" + $json.stdout.trim() + \"'\" }}"
       },
       "id": "process_video",
       "name": "Run Pipeline",

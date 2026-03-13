@@ -8,12 +8,12 @@
     <key>ProgramArguments</key>
     <array>
         <!-- UPDATE THIS PATH to your actual project location -->
-        <string>/Users/ansumandash126/.gemini/antigravity/scratch/fx-journal-pipeline/venv/bin/python</string>
-        <string>/Users/ansumandash126/.gemini/antigravity/scratch/fx-journal-pipeline/scripts/watch_inbox.py</string>
+        <string>/Users/ansumandash126/.gemini/antigravity/scratch/Backtesting-Video-Automation-To-google-sheet/venv/bin/python</string>
+        <string>/Users/ansumandash126/.gemini/antigravity/scratch/Backtesting-Video-Automation-To-google-sheet/scripts/watch_inbox.py</string>
     </array>
 
     <key>WorkingDirectory</key>
-    <string>/Users/ansumandash126/.gemini/antigravity/scratch/fx-journal-pipeline</string>
+    <string>/Users/ansumandash126/.gemini/antigravity/scratch/Backtesting-Video-Automation-To-google-sheet</string>
 
     <key>EnvironmentVariables</key>
     <dict>

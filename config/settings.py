@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Load .env from the project root (fx-journal-pipeline/.env)
+# Load .env from the project root (Backtesting-Video-Automation-To-google-sheet/.env)
 _project_root = Path(__file__).resolve().parent.parent
 load_dotenv(_project_root / ".env")
 
