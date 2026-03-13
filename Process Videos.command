@@ -6,7 +6,7 @@
 # ═══════════════════════════════════════════════════════
 
 # Get the project directory (where the pipeline code lives)
-PROJECT_DIR="$HOME/.gemini/antigravity/scratch/Backtesting-Video-Automation-To-google-sheet"
+PROJECT_DIR="$HOME/Library/Mobile Documents/com~apple~CloudDocs/Antigravity/Backtesting-Video-Automation-To-google-sheet"
 
 # Activate virtual environment and run
 cd "$PROJECT_DIR"
