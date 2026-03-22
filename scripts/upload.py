@@ -180,74 +180,78 @@ def build_sheet_row(trade: dict, screenshot_links: dict, trade_id: str) -> list:
     mae_pct_sl = round(mae / sl_pips * 100, 1) if mae and sl_pips else None
     mfe_pct_tp = round(mfe / tp_pips * 100, 1) if mfe and tp_pips else None
 
-    # Build the row (41 columns, matching actual Google Sheet schema)
+    # Build the row (45 columns, matching actual Google Sheet schema)
     row = [
         # Col 1-5: Trade Identification
         trade_id,                                    # 1. Trade ID
         trade.get("date") or "",                     # 2. Date
-        pair,                                        # 3. Pair
-        trade.get("session") or "",                  # 4. Session
-        direction,                                   # 5. Direction
+        trade.get("entry_time") or "",               # 3. Entry Time
+        pair,                                        # 4. Pair
+        trade.get("session") or "",                  # 5. Session
+        
+        # Col 6-12: Core Trade Mechanics
+        direction,                                   # 6. Direction
+        entry or "",                                 # 7. Entry Price
+        sl or "",                                    # 8. Stop Loss
+        tp or "",                                    # 9. Take Profit
+        exit_price or "",                            # 10. Exit Price
+        trade.get("exit_time") or "",                # 11. Exit Time
+        trade.get("outcome") or "",                  # 12. Outcome
+        
+        # Col 13-19: Core Metrics & Hidden Calcs
+        sl_pips or "",                               # 13. SL Pips (M)
+        tp_pips or "",                               # 14. TP Pips (N)
+        result_pips or "",                           # 15. Result Pips (O)
+        rr_ratio or "",                              # 16. RR Ratio (P)
+        r_multiple or "",                            # 17. R-Multiple (Q)
+        pnl_dollars or "",                           # 18. P&L ($) (R)
+        pos_size or "",                              # 19. Position Size (S)
+        
+        # Col 20-24: Risk Analytics
+        mae or "",                                   # 20. MAE Pips (T)
+        mfe or "",                                   # 21. MFE Pips (U)
+        mae_pct_sl or "",                            # 22. MAE % of SL (V)
+        mfe_pct_tp or "",                            # 23. MFE % of TP (W)
+        trade.get("trade_duration") or "",           # 24. Trade Duration (X)
 
-        # Col 6-10: Core Trade Mechanics
-        entry or "",                                 # 6. Entry Price
-        sl or "",                                    # 7. Stop Loss
-        tp or "",                                    # 8. Take Profit
-        exit_price or "",                            # 9. Exit Price
-        trade.get("outcome") or "",                  # 10. Outcome
+        # Col 25-32: Trade Reasoning
+        trade.get("htf_reference") or "",            # 25. HTF Reference (Y)
+        trade.get("direction_thesis") or "",         # 26. Direction Thesis (Z)
+        trade.get("location_zone_type") or "",       # 27. Location Zone (AA)
+        trade.get("location_timeframe") or "",       # 28. Location TF (AB)
+        trade.get("location_thesis") or "",          # 29. Location Thesis (AC)
+        trade.get("execution_model_name") or "",     # 30. Execution Model (AD)
+        trade.get("execution_timeframe") or "",      # 31. Execution TF (AE)
+        trade.get("execution_thesis") or "",         # 32. Execution Thesis (AF)
+        
+        # Col 33-38: Confluence & Review
+        trade.get("positive_confluence_list") or "", # 33. +ve Confluence List (AG)
+        trade.get("negative_confluence_list") or "", # 34. -ve Confluence List (AH)
+        trade.get("confluence_score") or "",         # 35. Confluence (OLD) (AI)
+        trade.get("pre_trade_conviction") or "",     # 36. Conviction (AJ)
+        trade.get("mistakes_noted") or "",           # 37. Mistakes (AK)
+        trade.get("post_trade_review") or "",        # 38. Post-Trade Review (AL)
 
-        # Col 11-17: Trade Metrics
-        sl_pips or "",                               # 11. SL Pips
-        tp_pips or "",                               # 12. TP Pips
-        result_pips or "",                           # 13. Result Pips
-        rr_ratio or "",                              # 14. RR Ratio
-        r_multiple or "",                            # 15. R-Multiple
-        pnl_dollars or "",                           # 16. P&L ($)
-        pos_size,                                    # 17. Position Size
+        # Col 39-41: Visual Evidence
+        screenshot_links.get("direction", ""),       # 39. Dir Screenshot (AM)
+        screenshot_links.get("location", ""),        # 40. Loc Screenshot (AN)
+        screenshot_links.get("execution", ""),       # 41. Exec Screenshot (AO)
 
-        # Col 18-22: Risk Analytics
-        mae or "",                                   # 18. MAE Pips
-        mfe or "",                                   # 19. MFE Pips
-        mae_pct_sl or "",                            # 20. MAE % of SL
-        mfe_pct_tp or "",                            # 21. MFE % of TP
-        trade.get("trade_duration") or "",           # 22. Trade Duration
-
-        # Col 23-34: Trade Reasoning
-        trade.get("htf_reference") or "",            # 23. HTF Reference
-        trade.get("direction_thesis") or "",         # 24. Direction Thesis
-        trade.get("location_zone_type") or "",       # 25. Location Zone
-        trade.get("location_timeframe") or "",       # 26. Location TF
-        trade.get("location_thesis") or "",          # 27. Location Thesis
-        trade.get("execution_model_name") or "",     # 28. Execution Model
-        trade.get("execution_timeframe") or "",      # 29. Execution TF
-        trade.get("execution_thesis") or "",         # 30. Execution Thesis
-        trade.get("confluence_score") or "",         # 31. Confluence
-        trade.get("pre_trade_conviction") or "",     # 32. Conviction
-        trade.get("mistakes_noted") or "",           # 33. Mistakes
-        trade.get("post_trade_review") or "",        # 34. Post-Trade Review
-
-        # Col 35-37: Visual Evidence
-        screenshot_links.get("direction", ""),       # 35. Dir Screenshot
-        screenshot_links.get("location", ""),        # 36. Loc Screenshot
-        screenshot_links.get("execution", ""),       # 37. Exec Screenshot
-
-        # Col 38-41: Performance Analytics — ALL FORMULAS in Sheet
-        "",  # 38. Cumulative R (formula)
-        "",  # 39. Cumulative P&L (formula)
-        "",  # 40. Equity Peak (formula)
-        "",  # 41. Drawdown ($) (formula)
+        # Col 42-45: Performance Analytics — ALL FORMULAS in Sheet
+        "",  # 42. Cumulative R (formula) (AP)
+        "",  # 43. Cumulative P&L (formula) (AQ)
+        "",  # 44. Equity Peak (formula) (AR)
+        "",  # 45. Drawdown ($) (formula) (AS)
     ]
 
     return row
 
 
-def get_next_trade_id(pair: str) -> str:
+def get_next_week_trade_id(week_num: int) -> str:
     """
     Generate the next trade ID by checking the Sheet for existing entries.
-    Format: PAIR-YYYY-NNN (e.g., EURUSD-2025-014)
+    Format: W{week_num}-T{trade_num} (e.g., W3-T4)
     """
-    import datetime
-
     try:
         import gspread
 
@@ -260,37 +264,36 @@ def get_next_trade_id(pair: str) -> str:
         except gspread.WorksheetNotFound:
             # Create the tab if it doesn't exist
             worksheet = sheet.add_worksheet(title=SHEET_TAB_NAME, rows=1000, cols=52)
-            return f"{pair}-{datetime.datetime.now().year}-001"
+            return f"W{week_num}-T1"
 
         # Get all values in column A (Trade ID)
         trade_ids = worksheet.col_values(1)
 
-        # Filter for this pair and year
-        year = datetime.datetime.now().year
-        prefix = f"{pair}-{year}-"
+        prefix = f"W{week_num}-T"
         matching = [tid for tid in trade_ids if tid.startswith(prefix)]
 
         if matching:
-            last_num = max(int(tid.split("-")[-1]) for tid in matching)
-            return f"{prefix}{last_num + 1:03d}"
+            last_num = max(int(tid.split("-T")[-1]) for tid in matching)
+            return f"{prefix}{last_num + 1}"
         else:
-            return f"{prefix}001"
+            return f"{prefix}1"
 
     except Exception as e:
         logger.warning(f"Could not fetch existing trade IDs: {e}")
-        return f"{pair}-{datetime.datetime.now().year}-001"
+        return f"W{week_num}-T1"
 
 
-def append_trades_to_sheet(trades: list[dict], all_screenshot_links: list[dict]) -> int:
+def append_trades_to_sheet(trades: list[dict], all_screenshot_links: list[dict], trade_ids: list[str] = None) -> tuple[int, list[str]]:
     """
     Append one or more trade rows to the Google Sheet.
 
     Args:
         trades: List of trade dicts from parse_trade.py
         all_screenshot_links: List of screenshot link dicts (one per trade)
+        trade_ids: Optional list of trade IDs. If not provided, basic ones are generated.
 
     Returns:
-        Number of rows appended.
+        Tuple of (number of rows appended, list of trade IDs generated/used).
     """
     try:
         import gspread
@@ -318,9 +321,17 @@ def append_trades_to_sheet(trades: list[dict], all_screenshot_links: list[dict])
         logger.info("Inserted header row.")
 
     rows_added = 0
+    used_trade_ids = []
+    
     for i, trade in enumerate(trades):
-        pair = (trade.get("pair") or "UNKNOWN").upper().replace("/", "")
-        trade_id = get_next_trade_id(pair)
+        if trade_ids and i < len(trade_ids):
+            trade_id = trade_ids[i]
+        else:
+            # Fallback if no trade_ids provided
+            pair = (trade.get("pair") or "UNKNOWN").upper().replace("/", "")
+            trade_id = f"{pair}-T{i+1}"
+            
+        used_trade_ids.append(trade_id)
         screenshot_links = all_screenshot_links[i] if i < len(all_screenshot_links) else {}
 
         row = build_sheet_row(trade, screenshot_links, trade_id)
@@ -333,32 +344,21 @@ def append_trades_to_sheet(trades: list[dict], all_screenshot_links: list[dict])
         rows_added += 1
 
     logger.info(f"Total rows appended: {rows_added}")
-    return rows_added
+    return rows_added, used_trade_ids
 
 
 def get_sheet_headers() -> list[str]:
-    """Return the 41-column header row for the Google Sheet."""
+    """Return the 45-column header row for the Google Sheet."""
     return [
-        # Trade Identification
-        "Trade ID", "Date", "Pair", "Session", "Direction",
-        # Core Trade Mechanics
-        "Entry Price", "Stop Loss", "Take Profit", "Exit Price", "Outcome",
-        # Trade Metrics
-        "SL Pips", "TP Pips", "Result Pips", "RR Ratio", "R-Multiple",
-        "P&L ($)", "Position Size",
-        # Risk Analytics
-        "MAE Pips", "MFE Pips", "MAE % of SL", "MFE % of TP",
-        "Trade Duration",
-        # Trade Reasoning
-        "HTF Reference", "Direction Thesis",
-        "Location Zone", "Location TF", "Location Thesis",
-        "Execution Model", "Execution TF", "Execution Thesis",
-        "Confluence", "Conviction",
-        "Mistakes", "Post-Trade Review",
-        # Visual Evidence
-        "Dir Screenshot", "Loc Screenshot", "Exec Screenshot",
-        # Performance Analytics (formulas)
-        "Cumulative R", "Cumulative P&L", "Equity Peak", "Drawdown ($)",
+        "Trade ID", "Date", "Entry Time", "Pair", "Session", 
+        "Direction", "Entry Price", "Stop Loss", "Take Profit", "Exit Price", 
+        "Exit Time", "Outcome", "SL Pips", "TP Pips", "Result Pips", 
+        "RR Ratio", "R-Multiple", "P&L ($)", "Position Size", "MAE Pips", 
+        "MFE Pips", "MAE % of SL", "MFE % of TP", "Trade Duration", "HTF Reference", 
+        "Direction Thesis", "Location Zone", "Location TF", "Location Thesis", "Execution Model", 
+        "Execution TF", "Execution Thesis", "+ve Confluence List", "-ve Confluence List", "Confluence", 
+        "Conviction", "Mistakes", "Post-Trade Review", "Dir Screenshot", "Loc Screenshot", 
+        "Exec Screenshot", "Cumulative R", "Cumulative P&L", "Equity Peak", "Drawdown ($)"
     ]
 
 

@@ -47,6 +47,8 @@ CRITICAL RULES:
 - For session: ONLY "Asian", "London", "NY AM", "NY PM", or "London-NY Overlap".
 - Confluence/conviction: integers 1-5. If not mentioned, null.
 - Trade duration: string like "45 min" or "2 hours". If not mentioned, null.
+- Confluence lists: Extract any positive confluences (+ve) and negative confluences (-ve) mentioned into comma-separated strings.
+- Times: Extract entry time and exit time if spoken (e.g. "10:30 AM", "14:15").
 
 PAIR IDENTIFICATION:
 - If the trader says the pair name, use it (e.g. "EURUSD", "cable" = GBPUSD, "fiber" = EURUSD).
@@ -76,6 +78,7 @@ Return a JSON array of trade objects with this structure:
   {
     "trade_number": 1,
     "date": "YYYY-MM-DD or null",
+    "entry_time": "HH:MM AM/PM or null",
     "session": "London / NY AM / NY PM / Asian / London-NY Overlap / null",
     "pair": "EURUSD / GBPUSD / etc. or null",
     "trade_type": "Scalp / Intraday / null",
@@ -88,26 +91,24 @@ Return a JSON array of trade objects with this structure:
     "scale_in_2": null,
     "scale_out_1": null,
     "scale_out_2": null,
-    "position_size_lots": null,
     "risk_percent": null,
 
     "outcome": "Win / Loss / Breakeven / Partial / null",
     "exit_price": null,
+    "exit_time": "HH:MM AM/PM or null",
     "mae_pips": null,
     "mfe_pips": null,
     "max_r_available": null,
     "trade_duration": null,
 
-    "htf_reference": "H4 / D1 / W1 / etc. or null",
     "direction_thesis": "1-2 crisp sentences summarizing HTF directional bias and reasoning",
     "location_zone_type": "OB / FVG / Breaker / Demand / Supply / BOS level / etc. or null",
-    "location_timeframe": "M15 / H1 / etc. or null",
     "location_thesis": "1-2 crisp sentences on why this zone was chosen",
     "execution_model_name": "CHoCH / BOS / MSS / CISD / FVG entry / OB mitigation / etc. or null",
-    "execution_timeframe": "M1 / M5 / etc. or null",
     "execution_thesis": "1-2 crisp sentences on the entry trigger and confirmation",
 
-    "confluence_score": null,
+    "positive_confluence_list": "Comma-separated list of positive confluences or null",
+    "negative_confluence_list": "Comma-separated list of negative confluences or null",
     "pre_trade_conviction": null,
     "mistakes_noted": "Concise summary of mistakes or null",
     "post_trade_review": "Concise summary of post-trade observations or null",

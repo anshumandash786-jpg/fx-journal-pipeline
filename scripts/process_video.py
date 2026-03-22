@@ -29,7 +29,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from config.settings import PROCESSING_DIR, DONE_DIR, LOG_DIR
+from config.settings import PROCESSING_DIR, DONE_DIR, LOG_DIR, NOTION_ENABLED
 from scripts.transcribe import transcribe_video
 from scripts.extract_frames import extract_screenshots
 from scripts.parse_trade import parse_trades_from_transcript
@@ -37,6 +37,7 @@ from scripts.upload import (
     upload_screenshots,
     append_trades_to_sheet,
 )
+from scripts.notion_upload import append_trades_to_notion
 
 # ─────────────────────────────────────────────
 # LOGGING
@@ -105,7 +106,7 @@ def process_video(video_path: str | Path) -> dict:
 
     # ── STEP 1: Transcribe ──────────────────────────────
     logger.info("─" * 40)
-    logger.info("STEP 1/5: Transcribing audio...")
+    logger.info("STEP 1/6: Transcribing audio...")
     try:
         transcript = transcribe_video(processing_path)
         logger.info(f"Transcript: {len(transcript.get('words', []))} words")
@@ -120,7 +121,7 @@ def process_video(video_path: str | Path) -> dict:
 
     # ── STEP 2: Parse trades via Gemini ─────────────────
     logger.info("─" * 40)
-    logger.info("STEP 2/5: Extracting trade data via Gemini...")
+    logger.info("STEP 2/6: Extracting trade data via Gemini...")
     try:
         transcript_text = transcript.get("text", "")
         trades = parse_trades_from_transcript(transcript_text)
@@ -143,56 +144,81 @@ def process_video(video_path: str | Path) -> dict:
         _move_to_done(processing_path)
         return result
 
+    # ── STEP 2.5: Extract Video Date & Generate Trade IDs ──────────
+    logger.info("─" * 40)
+    logger.info("STEP 2.5: Extracting exact trading date from video...")
+    try:
+        from scripts.get_video_date import extract_date_from_video
+        date_info = extract_date_from_video(processing_path)
+        video_date = date_info["date"]
+        week_num = date_info["week_num"]
+        logger.info(f"Extracted Date: {video_date} (Week: {week_num}, Day: {date_info['day_of_week']})")
+    except Exception as e:
+        logger.warning(f"Could not extract date from video: {e}")
+        video_date = datetime.now().strftime("%Y-%m-%d")
+        week_num = datetime.now().isocalendar()[1]
+        
+    # Generate Wx-Ty trade IDs
+    trade_ids = []
+    try:
+        from scripts.upload import get_next_week_trade_id
+        # For multiple trades in one video, we increment the T number
+        base_id = get_next_week_trade_id(week_num)
+        base_prefix, base_num_str = base_id.split("-T")
+        current_num = int(base_num_str)
+        
+        for i, trade in enumerate(trades):
+            # Also update the trade dict so it has the right date instead of transcript date
+            trade["date"] = video_date
+            trade_ids.append(f"{base_prefix}-T{current_num + i}")
+    except Exception as e:
+        logger.error(f"Failed to generate trade IDs: {e}")
+        trade_ids = [f"W{week_num}-T{i+1}" for i in range(len(trades))]
+
     # ── STEP 3: Extract screenshots ─────────────────────
     logger.info("─" * 40)
-    logger.info("STEP 3/5: Extracting screenshots...")
+    logger.info("STEP 3/6: Extracting screenshots...")
 
     all_screenshots = []
     for i, trade in enumerate(trades):
-        trade_num = trade.get("trade_number", i + 1)
-        pair = (trade.get("pair") or "UNKNOWN").upper().replace("/", "")
-        date_str = trade.get("date") or datetime.now().strftime("%Y-%m-%d")
-        trade_label = f"{pair}_{date_str}_T{trade_num}"
-
+        trade_id = trade_ids[i]
+        
         try:
-            screenshots = extract_screenshots(processing_path, transcript, trade_label)
+            screenshots = extract_screenshots(processing_path, transcript, trade_id)
             all_screenshots.append(screenshots)
-            logger.info(f"Trade {trade_num}: {len(screenshots)} screenshots extracted")
+            logger.info(f"Trade {trade_id}: {len(screenshots)} screenshots extracted")
         except Exception as e:
-            logger.warning(f"Screenshot extraction failed for trade {trade_num}: {e}")
+            logger.warning(f"Screenshot extraction failed for trade {trade_id}: {e}")
             all_screenshots.append({})
-            result["errors"].append(f"Screenshots failed for trade {trade_num}: {e}")
+            result["errors"].append(f"Screenshots failed for trade {trade_id}: {e}")
 
     # ── STEP 4: Upload screenshots to Drive ─────────────
     logger.info("─" * 40)
-    logger.info("STEP 4/5: Uploading screenshots to Google Drive...")
+    logger.info("STEP 4/6: Uploading screenshots to Google Drive...")
 
     all_screenshot_links = []
     for i, screenshots in enumerate(all_screenshots):
-        trade_num = trades[i].get("trade_number", i + 1)
-        pair = (trades[i].get("pair") or "UNKNOWN").upper().replace("/", "")
-        date_str = trades[i].get("date") or datetime.now().strftime("%Y-%m-%d")
-        trade_label = f"{pair}_{date_str}_T{trade_num}"
+        trade_id = trade_ids[i]
 
         if screenshots:
             try:
-                links = upload_screenshots(screenshots, trade_label)
+                links = upload_screenshots(screenshots, trade_id)
                 all_screenshot_links.append(links)
                 result["screenshots_uploaded"] += len(links)
             except Exception as e:
-                logger.warning(f"Drive upload failed for trade {trade_num}: {e}")
+                logger.warning(f"Drive upload failed for trade {trade_id}: {e}")
                 all_screenshot_links.append({})
-                result["errors"].append(f"Drive upload failed for trade {trade_num}: {e}")
+                result["errors"].append(f"Drive upload failed for trade {trade_id}: {e}")
         else:
             all_screenshot_links.append({})
 
     # ── STEP 5: Append to Google Sheet ──────────────────
     logger.info("─" * 40)
-    logger.info("STEP 5/5: Writing to Google Sheet...")
+    logger.info("STEP 5/6: Writing to Google Sheet...")
     try:
-        rows_added = append_trades_to_sheet(trades, all_screenshot_links)
+        rows_added, used_ids = append_trades_to_sheet(trades, all_screenshot_links, trade_ids=trade_ids)
         result["trades_logged"] = rows_added
-        logger.info(f"Successfully logged {rows_added} trade(s) to Google Sheet")
+        logger.info(f"Successfully logged {rows_added} trade(s) to Google Sheet using IDs: {used_ids}")
     except Exception as e:
         error = f"Sheet write failed: {e}"
         logger.error(error)
@@ -204,6 +230,22 @@ def process_video(video_path: str | Path) -> dict:
         with open(backup_path, "w") as f:
             json.dump(trades, f, indent=2)
         logger.info(f"Trade data backed up to: {backup_path}")
+
+    # ── STEP 6: Write to Notion ────────────────────────
+    if NOTION_ENABLED:
+        logger.info("─" * 40)
+        logger.info("STEP 6/6: Writing to Notion...")
+        try:
+            notion_count = append_trades_to_notion(trades, all_screenshot_links, trade_ids)
+            result["notion_pages_created"] = notion_count
+            logger.info(f"Successfully created {notion_count} Notion page(s)")
+        except Exception as e:
+            error = f"Notion write failed: {e}"
+            logger.error(error)
+            logger.error(traceback.format_exc())
+            result["errors"].append(error)
+    else:
+        logger.info("Notion integration disabled. Skipping Step 6.")
 
     # ── Determine final status ──────────────────────────
     if result["trades_logged"] > 0 and not result["errors"]:
@@ -226,6 +268,8 @@ def process_video(video_path: str | Path) -> dict:
     logger.info(f"PIPELINE COMPLETE: {result['status'].upper()}")
     logger.info(f"Trades logged: {result['trades_logged']}")
     logger.info(f"Screenshots uploaded: {result['screenshots_uploaded']}")
+    if NOTION_ENABLED:
+        logger.info(f"Notion pages: {result.get('notion_pages_created', 0)}")
     if result["errors"]:
         logger.warning(f"Errors ({len(result['errors'])}):")
         for err in result["errors"]:
@@ -279,6 +323,7 @@ if __name__ == "__main__":
         print("  3. Captures screenshots (FFmpeg)")
         print("  4. Uploads screenshots (Google Drive)")
         print("  5. Logs trade data (Google Sheets)")
+        print("  6. Creates Notion journal page (if configured)")
         sys.exit(1)
 
     video_file = Path(sys.argv[1])

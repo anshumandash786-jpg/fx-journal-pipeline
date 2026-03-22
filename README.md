@@ -5,13 +5,13 @@
 ## How It Works
 
 ```
-You record video → Whisper transcribes → Gemini extracts data → Google Sheets logs it
+You record video → Whisper transcribes → Gemini extracts data → Google Sheets (math) + Notion (journal)
 ```
 
 1. **Record** your FX Replay session with screen + mic (OBS, QuickTime, etc.)
 2. **Narrate** using the verbal protocol (say prices, reasoning, "direction screenshot", etc.)
 3. **Drop** the video file into `~/FXBacktest/inbox/`
-4. **Pipeline auto-fires**: transcription → extraction → screenshots → Google Sheet
+4. **Pipeline auto-fires**: transcription → extraction → screenshots → Google Sheet + Notion
 
 ## Quick Start
 
@@ -22,7 +22,7 @@ chmod +x setup.sh
 
 # 2. Configure your API keys
 cp .env.example .env
-nano .env  # Add your GEMINI_API_KEY and GOOGLE_DRIVE_FOLDER_ID
+nano .env  # Add GEMINI_API_KEY, GOOGLE_DRIVE_FOLDER_ID, and optionally NOTION keys
 
 # 3. Set up Google credentials
 # → Follow the instructions printed by setup.sh
@@ -45,6 +45,7 @@ Backtesting-Video-Automation-To-google-sheet/
 │   ├── extract_frames.py    # Screenshot extraction at keyword timestamps
 │   ├── parse_trade.py       # Gemini LLM trade data extraction
 │   ├── upload.py            # Google Sheets + Drive integration
+│   ├── notion_upload.py     # Notion visual journal integration
 │   ├── process_video.py     # Master orchestration (chains all steps)
 │   └── watch_inbox.py       # Folder watcher (standalone alternative to n8n)
 ├── n8n/
@@ -95,6 +96,7 @@ launchctl load ~/Library/LaunchAgents/com.fxjournal.watcher.plist
 | FFmpeg (local) | ₹0 |
 | Gemini API | ₹0–200 |
 | Google Sheets/Drive | ₹0 |
+| Notion API | ₹0 |
 | **Total** | **₹0–200/month** |
 
 ## Troubleshooting
@@ -104,8 +106,8 @@ launchctl load ~/Library/LaunchAgents/com.fxjournal.watcher.plist
 - **Sheet not updating**: Ensure you shared the Sheet with the service account email.
 - **Logs**: Check `~/FXBacktest/logs/` for pipeline execution logs.
 
-## 🤖 AI Bootstrap / Disaster Recovery
+## 🤖 AI Bootstrap / Complete Setup Prompt
 
-If you get a new computer, lose this project, or want to hand this over to another AI assistant (like a fresh Antigravity session), just copy and paste this exact prompt to the AI:
+If you get a new computer or want to execute a fresh install, simply paste this exact prompt into a new AI agent session (like **Antigravity Claude Opus 4.6**):
 
-> *"Hi, I have a backtesting video automation project hosted on GitHub here: `https://github.com/anshumandash786-jpg/Backtesting-Video-Automation-To-google-sheet.git`. Please clone this repository to a new scratch folder. Read the `README.md`, `walkthrough.md`, and the python scripts to understand how the pipeline works. Please guide me through setting up the `.env` API keys and running the `setup.sh` file to get this working on my machine. If I face any issues, please help me debug and execute the pipeline."*
+> *"Hi Antigravity, I have my personal, fully automated backtesting video journaling pipeline hosted on GitHub here: `https://github.com/anshumandash786-jpg/Backtesting-Video-Automation-To-google-sheet.git`. Please clone this repository to a new directory. Read the `README.md`, `walkthrough.md` in the `.gemini/antigravity/brain` directory, and especially the `telegram_bot.py` and `process_day.py` scripts to completely understand the complex architecture (Google Sheets math integration, Notion Trade DB logging, Notion Daily Markups DB creation, and the Telegram Bot long-polling). Please execute the setup for me: guide me step-by-step through configuring all API keys in `.env`, running `setup.sh`, and installing the `com.fxjournal.telegrambot.plist` auto-start service. You must write and execute the terminal commands yourself so this pipeline runs completely hands-free from my phone via Telegram."*
